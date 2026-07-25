@@ -1,9 +1,14 @@
-FROM eclipse-temurin:17-jdk
+# Use the official Python image
+FROM python:3.12-slim
 
+# Set the working directory
 WORKDIR /app
 
-COPY HelloWorld.java .
+# Copy the application
+COPY app.py .
 
-RUN javac HelloWorld.java
+# Expose the application port
+EXPOSE 8000
 
-CMD ["java", "HelloWorld"]
+# Run the application
+CMD ["python", "app.py"]
