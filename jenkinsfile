@@ -1,0 +1,42 @@
+pipeline{
+    agent{
+        node{
+            label "dev"
+        }
+    }
+    stages{
+        stage("clone the code"){
+            steps{
+                git url:"https://github.com/swapnil281198/hello-java", branch: "main"
+                echo "code clone completed"
+            }
+        }
+        stage("build"){
+            steps{
+                sh "docker build -t hello-java ."
+                echo "image build successfully"
+            }
+        }
+        stage("dockerpush to hub"){
+            steps{
+                withCredentials(
+                    [usernamePassword(
+                        credentialsId:"dockercreds",
+                        passwordVariable:"dockerpassword",
+                        usernameVariable:"dockerusername"
+                        )
+                        ]){
+                            sh "docker image tag hello-java ${env.dockerusername}/hello-java"
+                            sh "docker login -u ${env.dockerusername} -p ${env.dockerpassword}"
+                            sh "docker push ${env.dockerusername}/hello-java"
+                        }
+            }
+        }
+        stage("deploy"){
+            steps{
+                sh "docker compose down && docker compose up -d"
+                echo "deploy completed"
+            }
+        }
+    }
+}
